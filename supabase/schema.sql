@@ -99,10 +99,8 @@ drop policy if exists "reportes_insert" on public.reportes;
 create policy "zonas_select" on public.zonas
   for select to anon, authenticated using (true);
 
--- Cualquiera puede agregar una zona nueva, pero solo marcada como custom
-create policy "zonas_insert" on public.zonas
-  for insert to anon, authenticated
-  with check (custom = true and char_length(nombre) between 2 and 60);
+-- Las urbanizaciones se agregan manualmente desde el SQL Editor de Supabase
+-- (rol postgres, que se salta RLS). No hay política de insert para anon.
 
 -- Cualquiera puede leer los reportes
 create policy "reportes_select" on public.reportes

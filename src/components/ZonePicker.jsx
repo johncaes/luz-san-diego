@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardTitle } from "./primitives.jsx";
 import { norm } from "../lib/format.js";
 
-export function ZonePicker({ zones, value, onChange, onAddClick, loading }) {
+export function ZonePicker({ zones, value, onChange, loading }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -147,17 +147,6 @@ export function ZonePicker({ zones, value, onChange, onAddClick, loading }) {
           </ul>
         )}
       </div>
-
-      <p className="mt-2.5 px-0.5 text-[0.84rem] text-ink-dim">
-        ¿No aparece?{" "}
-        <button
-          type="button"
-          onClick={onAddClick}
-          className="font-semibold text-amber underline underline-offset-2"
-        >
-          Agregar urbanización
-        </button>
-      </p>
     </Card>
   );
 }

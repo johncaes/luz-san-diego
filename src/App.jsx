@@ -11,15 +11,13 @@ import { ReportCard } from "./components/ReportCard.jsx";
 import { PredictionCard } from "./components/PredictionCard.jsx";
 import { HourChart } from "./components/HourChart.jsx";
 import { ActivityFeed } from "./components/ActivityFeed.jsx";
-import { AddZoneDialog } from "./components/AddZoneDialog.jsx";
 import { Toast } from "./components/Toast.jsx";
 
 const LS_ZONE = "sd_zone";
 
 export default function App() {
-  const { zones, loading, addZone } = useZones();
+  const { zones, loading } = useZones();
   const [zoneId, setZoneId] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef();
@@ -81,20 +79,6 @@ export default function App() {
     [addReport, showToast],
   );
 
-  const handleAddZone = useCallback(
-    async (name) => {
-      setDialogOpen(false);
-      const res = await addZone(name);
-      if (!res) {
-        showToast("No se pudo agregar");
-        return;
-      }
-      selectZone(res.id);
-      showToast(res.duplicate ? "Esa urbanización ya existe" : "Urbanización agregada");
-    },
-    [addZone, selectZone, showToast],
-  );
-
   return (
     <div className="mx-auto flex max-w-[600px] flex-col gap-4 px-4 pb-16 pt-6">
       <Header />
@@ -112,7 +96,6 @@ export default function App() {
         value={zoneId}
         loading={loading}
         onChange={selectZone}
-        onAddClick={() => setDialogOpen(true)}
       />
 
       <StatusHero analysis={analysis} zoneName={zoneName} hasZone={!!zoneId} />
@@ -134,11 +117,6 @@ export default function App() {
         Datos aportados por vecinos · no es información oficial de CORPOELEC
       </p>
 
-      <AddZoneDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSubmit={handleAddZone}
-      />
       <Toast message={toast} />
     </div>
   );

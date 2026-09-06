@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase.js";
-import { slug } from "../lib/format.js";
 
 const byName = (a, b) => a.name.localeCompare(b.name, "es");
 
@@ -57,30 +56,5 @@ export function useZones() {
     };
   }, [load]);
 
-  const addZone = useCallback(
-    async (name) => {
-      name = String(name || "").trim();
-      if (!name || !supabase) return null;
-      const dup = zones.find((z) => z.name.toLowerCase() === name.toLowerCase());
-      if (dup) return { id: dup.id, duplicate: true };
-      const { data, error } = await supabase
-        .from("zonas")
-        .insert({
-          nombre: name,
-          slug: slug(name) + "-" + Math.random().toString(36).slice(2, 6),
-          custom: true,
-        })
-        .select("id,nombre,last_tipo,last_ts")
-        .single();
-      if (error) {
-        console.warn("addZone", error);
-        return null;
-      }
-      setZones((prev) => [...prev, mapRow(data)].sort(byName));
-      return { id: data.id };
-    },
-    [zones],
-  );
-
-  return { zones, loading, addZone, reload: load };
+  return { zones, loading, reload: load };
 }

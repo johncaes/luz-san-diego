@@ -80,3 +80,13 @@ del corte. Necesita ≥ 4 cortes registrados para activarse.
 un trigger que rechaza el mismo reporte repetido en < 2 min. Si el proyecto
 crece: Turnstile/hCaptcha antes de reportar, o una Edge Function que limite
 por IP, o exigir varios reportes independientes para cambiar el estado.
+
+**Agregar urbanizaciones.** Se hace a mano en el **SQL Editor** de Supabase:
+
+```sql
+insert into public.zonas (slug, nombre) values
+  ('nombre-en-slug', 'Nombre bonito')
+on conflict (slug) do nothing;
+```
+
+Aparece sola en la app (realtime). La app no tiene botón para agregar.

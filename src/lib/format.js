@@ -8,18 +8,6 @@ export function norm(s) {
     .replace(/[̀-ͯ]/g, "");
 }
 
-export function slug(s) {
-  return (
-    String(s)
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-      .slice(0, 30) || "x"
-  );
-}
-
 export function relTime(ms) {
   const s = Math.round((Date.now() - ms) / 1000);
   if (s < 45) return "hace un momento";
