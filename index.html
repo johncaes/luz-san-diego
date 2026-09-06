@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>¿Cuándo se va la luz?</title>
+<meta name="description" content="Reportes vecinales de cortes eléctricos por urbanización en San Diego, Carabobo, con predicción de la próxima falla." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #14120e;
+    --bg-grad: radial-gradient(120% 90% at 50% -10%, #221d14 0%, #14120e 55%, #100e0b 100%);
+    --surface: #1e1b15;
+    --surface-2: #262117;
+    --line: #38311f;
+    --line-soft: #2b2519;
+    --ink: #efe7d6;
+    --ink-mid: #b3a689;
+    --ink-dim: #8a7d63;
+    --amber: #f5b841;
+    --amber-soft: #6b4f1c;
+    --on: #64c08a;
+    --on-soft: #1f3a2b;
+    --off: #e2634c;
+    --off-soft: #43221c;
+    --shadow: 0 1px 0 rgba(255,255,255,.03), 0 18px 40px -20px rgba(0,0,0,.7);
+    --r: 14px;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f4efe4;
+    --bg-grad: radial-gradient(120% 90% at 50% -10%, #fbf7ec 0%, #f4efe4 60%, #ece5d5 100%);
+    --surface: #fffdf7;
+    --surface-2: #f7f1e3;
+    --line: #e0d6bf;
+    --line-soft: #eee6d3;
+    --ink: #2c2618;
+    --ink-mid: #6b6047;
+    --ink-dim: #8a7d63;
+    --amber: #c8871a;
+    --amber-soft: #f0deb4;
+    --on: #2f8f5b;
+    --on-soft: #d8ecdf;
+    --off: #c34a34;
+    --off-soft: #f2ddd6;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 16px 34px -22px rgba(80,60,20,.35);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #f4efe4;
+      --bg-grad: radial-gradient(120% 90% at 50% -10%, #fbf7ec 0%, #f4efe4 60%, #ece5d5 100%);
+      --surface: #fffdf7;
+      --surface-2: #f7f1e3;
+      --line: #e0d6bf;
+      --line-soft: #eee6d3;
+      --ink: #2c2618;
+      --ink-mid: #6b6047;
+      --ink-dim: #8a7d63;
+      --amber: #c8871a;
+      --amber-soft: #f0deb4;
+      --on: #2f8f5b;
+      --on-soft: #d8ecdf;
+      --off: #c34a34;
+      --off-soft: #f2ddd6;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 16px 34px -22px rgba(80,60,20,.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: var(--bg-grad);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+  code { font-family: "IBM Plex Mono", monospace; font-size: .85em; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 22px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+
+  header .kicker {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-dim); margin: 0 0 6px;
+  }
+  header h1 {
+    font-family: "Bricolage Grotesque", "IBM Plex Sans", sans-serif; font-weight: 800;
+    font-size: clamp(1.9rem, 7vw, 2.7rem); line-height: 1.02; letter-spacing: -.02em;
+    text-wrap: balance; margin: 0;
+  }
+  header h1 .spark { color: var(--amber); }
+  header p.sub { margin: 8px 0 0; color: var(--ink-mid); font-size: .92rem; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; }
+  .card h2 {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .78rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); margin: 0 0 12px;
+  }
+
+  .field { position: relative; }
+  .field select {
+    appearance: none; -webkit-appearance: none;
+    width: 100%; padding: 13px 40px 13px 14px;
+    background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 11px;
+    font-family: inherit; font-size: 1rem; font-weight: 500; cursor: pointer;
+    line-height: 1.3;
+  }
+  .field select:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+  .field select option { background: var(--surface); color: var(--ink); }
+  .field::after {
+    content: ""; position: absolute; right: 16px; top: 50%; width: 8px; height: 8px;
+    border-right: 2px solid var(--ink-dim); border-bottom: 2px solid var(--ink-dim);
+    transform: translateY(-70%) rotate(45deg); pointer-events: none;
+  }
+  .whenrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .whenrow > .lbl { font-size: .8rem; color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; flex: 0 0 auto; }
+  .field.sm { flex: 1; max-width: 200px; }
+  .field.sm select { padding: 10px 36px 10px 12px; font-size: .92rem; }
+  .field.sm::after { right: 14px; width: 7px; height: 7px; }
+  input[type="time"], input[type="date"] {
+    appearance: none; -webkit-appearance: none;
+    background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 11px;
+    font-family: inherit; font-size: .95rem; font-weight: 500;
+    padding: 10px 12px; line-height: 1.3; cursor: pointer;
+  }
+  input[type="time"] { min-width: 128px; }
+  input[type="date"] { min-width: 150px; }
+  input[type="time"]:focus-visible, input[type="date"]:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+  .addline { margin: 10px 2px 0; font-size: .84rem; color: var(--ink-dim); }
+  .addline button {
+    background: none; border: 0; color: var(--amber); font: inherit; font-weight: 600;
+    cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px;
+  }
+
+  .hero { position: relative; overflow: hidden; }
+  .hero.state-off { border-color: color-mix(in srgb, var(--off) 45%, var(--line)); }
+  .hero.state-on { border-color: color-mix(in srgb, var(--on) 40%, var(--line)); }
+  .hero .crumb { font-family: "IBM Plex Mono", monospace; font-size: .74rem; color: var(--ink-dim); margin-bottom: 10px; letter-spacing: .02em; }
+  .hero .badge {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -.01em;
+  }
+  .hero .lamp { width: 15px; height: 15px; border-radius: 50%; background: var(--ink-dim); flex: 0 0 auto; }
+  .hero.state-on .lamp { background: var(--on); box-shadow: 0 0 18px 2px color-mix(in srgb, var(--on) 60%, transparent); }
+  .hero.state-off .lamp { background: var(--off); box-shadow: 0 0 18px 2px color-mix(in srgb, var(--off) 55%, transparent); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+  @media (prefers-reduced-motion: reduce) { .hero.state-off .lamp { animation: none; } }
+  .hero .since { margin-top: 10px; font-size: 2rem; font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; letter-spacing: -.02em; }
+  .hero .meta { color: var(--ink-mid); font-size: .88rem; margin-top: 2px; }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn {
+    appearance: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+    font-family: inherit; font-size: .96rem; font-weight: 600; padding: 15px 12px; border-radius: 12px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .08s, border-color .12s, background .12s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn .ic { font-size: 1.3rem; }
+  .btn.off:hover { border-color: var(--off); background: var(--off-soft); }
+  .btn.on:hover { border-color: var(--on); background: var(--on-soft); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .hint { color: var(--ink-dim); font-size: .84rem; margin: 12px 2px 0; }
+
+  .predict { border-color: color-mix(in srgb, var(--amber) 35%, var(--line)); }
+  .predict .big { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 1.25rem; line-height: 1.25; letter-spacing: -.01em; text-wrap: balance; margin: 2px 0 0; }
+  .predict .big .hl { color: var(--amber); }
+  .predict .note { color: var(--ink-mid); font-size: .86rem; margin-top: 8px; }
+  .conf { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-size: .78rem; color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+  .conf .bars { display: flex; gap: 3px; }
+  .conf .bars i { width: 16px; height: 6px; border-radius: 2px; background: var(--line); display: block; }
+  .conf .bars i.f { background: var(--amber); }
+
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 96px; margin-top: 4px; }
+  .chart .bar { flex: 1; background: var(--line); border-radius: 2px 2px 0 0; min-height: 2px; transition: height .2s; }
+  .chart .bar.hot { background: var(--amber); }
+  .chart .bar.now { outline: 2px solid var(--ink-mid); outline-offset: 1px; }
+  .axis { display: flex; justify-content: space-between; font-family: "IBM Plex Mono", monospace; font-size: .68rem; color: var(--ink-dim); margin-top: 6px; }
+
+  .feed { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; }
+  .feed li { list-style: none; display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line-soft); font-size: .88rem; }
+  .feed li:first-child { border-top: 0; }
+  .feed .tag { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+  .feed .tag.off { background: var(--off); }
+  .feed .tag.on { background: var(--on); }
+  .feed .when { margin-left: auto; color: var(--ink-dim); font-family: "IBM Plex Mono", monospace; font-size: .78rem; }
+  .feed .empty, .muted { color: var(--ink-dim); font-size: .86rem; }
+
+  .foot { text-align: center; color: var(--ink-dim); font-size: .76rem; font-family: "IBM Plex Mono", monospace; }
+
+  dialog {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: var(--r); padding: 18px; max-width: 360px; width: calc(100% - 40px); box-shadow: var(--shadow);
+  }
+  dialog::backdrop { background: rgba(8,6,4,.6); }
+  dialog h3 { margin: 0 0 4px; font-family: "Bricolage Grotesque", sans-serif; }
+  dialog p { margin: 0 0 12px; color: var(--ink-mid); font-size: .86rem; }
+  dialog input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font: inherit; margin-bottom: 12px; }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; }
+  dialog button { padding: 9px 15px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+  dialog button.primary { background: var(--amber); border-color: var(--amber); color: #1c1608; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px;
+    font-size: .86rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .banner { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; color: var(--ink-mid); font-size: .88rem; }
+  .banner b { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">San Diego · Carabobo</p>
+    <h1><span class="spark">⚡</span> ¿Cuándo se va la luz?</h1>
+    <p class="sub">Bitácora vecinal de cortes eléctricos. Elige tu urbanización, reporta cuando se va y cuando vuelve, y la app aprende el patrón de cada zona.</p>
+  </header>
+
+  <div id="dbBanner" hidden class="banner"></div>
+
+  <div class="card">
+    <h2>Tu urbanización</h2>
+    <div class="field">
+      <select id="zone" aria-label="Selecciona tu urbanización">
+        <option value="">Selecciona…</option>
+      </select>
+    </div>
+    <p class="addline">¿No aparece? <button id="addBtn" type="button">Agregar urbanización</button></p>
+  </div>
+
+  <div class="card hero" id="hero">
+    <div class="crumb" id="heroCrumb"></div>
+    <div class="badge"><span class="lamp"></span><span id="heroState">—</span></div>
+    <div class="since" id="heroSince"></div>
+    <div class="meta" id="heroMeta"></div>
+  </div>
+
+  <div class="card">
+    <h2>Reportar</h2>
+    <div class="actions">
+      <button class="btn off" id="btnOff" disabled><span class="ic">🔌</span>Se fue la luz</button>
+      <button class="btn on" id="btnOn" disabled><span class="ic">💡</span>Volvió la luz</button>
+    </div>
+    <div class="whenrow">
+      <span class="lbl">¿A qué hora?</span>
+      <input type="time" id="attime" aria-label="Hora del evento" />
+      <span class="field sm" style="max-width:150px">
+        <select id="atday" aria-label="Día del evento">
+          <option value="0">Hoy</option>
+          <option value="1">Ayer</option>
+        </select>
+      </span>
+    </div>
+    <p class="hint" id="reportHint">Selecciona tu urbanización para habilitar el reporte.</p>
+  </div>
+
+  <div class="card predict" id="predict">
+    <h2>Predicción</h2>
+    <p class="big" id="predBig">Selecciona tu urbanización.</p>
+    <p class="note" id="predNote"></p>
+    <div class="conf" id="predConf" hidden>
+      confianza
+      <span class="bars"><i></i><i></i><i></i></span>
+      <span id="confLabel"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Patrón por hora del día</h2>
+    <div class="chart" id="chart"></div>
+    <div class="axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>
+    <p class="note muted" id="chartNote" style="margin-top:10px"></p>
+  </div>
+
+  <div class="card">
+    <h2>Actividad reciente</h2>
+    <ul class="feed" id="feed"><li class="empty">Sin reportes todavía.</li></ul>
+  </div>
+
+  <p class="foot">Datos aportados por vecinos · no es información oficial de CORPOELEC</p>
+</div>
+
+<dialog id="addDlg">
+  <h3>Agregar urbanización</h3>
+  <p>Nombre de la urbanización, conjunto residencial o calle de San Diego.</p>
+  <input id="addInput" maxlength="48" placeholder="Urbanización Paso Real" />
+  <div class="row">
+    <button id="addCancel" type="button">Cancelar</button>
+    <button id="addOk" class="primary" type="button">Agregar</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ══════════════════════════════════════════════════════════════
+     CONFIGURACIÓN — datos de tu proyecto Supabase.
+     Project Settings › API  →  Project URL  y  Publishable key.
+     La publishable key es segura de publicar; las políticas RLS
+     del archivo supabase/schema.sql son lo que protege los datos.
+     ══════════════════════════════════════════════════════════════ */
+  var SUPABASE_URL = "https://jhiagtuguxjwyldpjlpn.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_AWfCz59C3Fvx6yoRsJMZJQ_uU3hLECY";
+  /* ════════════════════════════════════════════════════════════ */
+
+  var WD = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+  var SB = null;
+  var state = { db: null, zones: [], selZone: null, events: [], repCh: null, hot: [] };
+
+  var myId;
+  try { myId = localStorage.getItem("sd_uid"); } catch (e) {}
+  if (!myId) {
+    myId = "u" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { localStorage.setItem("sd_uid", myId); } catch (e) {}
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove("show"); }, 2400);
+  }
+  function slug(s) {
+    return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 30) || "x";
+  }
+  function relTime(ms) {
+    var s = Math.round((Date.now() - ms) / 1000);
+    if (s < 45) return "hace un momento";
+    var m = Math.round(s / 60);
+    if (m < 60) return "hace " + m + " min";
+    var h = Math.floor(m / 60), rm = m % 60;
+    if (h < 24) return "hace " + h + " h" + (rm ? " " + rm + " min" : "");
+    var d = Math.round(h / 24);
+    return "hace " + d + (d === 1 ? " día" : " días");
+  }
+  function fmtDur(ms) {
+    var m = Math.round(ms / 60000), h = Math.floor(m / 60), rm = m % 60;
+    if (h === 0) return rm + " min";
+    if (h < 24) return h + " h" + (rm ? " " + rm + " min" : "");
+    var d = Math.floor(h / 24); return d + " d " + (h % 24) + " h";
+  }
+  function hhmm(d) { return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
+  }
+
+  /* ---------- análisis ---------- */
+  function dedupe(times, gapMs) {
+    times.sort(function (a, b) { return a - b; });
+    var out = [];
+    for (var i = 0; i < times.length; i++) if (!out.length || times[i] - out[out.length - 1] > gapMs) out.push(times[i]);
+    return out;
+  }
+  function analyze(events) {
+    var starts = [], restores = [];
+    events.forEach(function (e) { if (e.type === "off") starts.push(e.ts); else if (e.type === "on") restores.push(e.ts); });
+    var outages = dedupe(starts, 40 * 60 * 1000), ons = dedupe(restores, 40 * 60 * 1000);
+    var byHour = new Array(24).fill(0), byWd = new Array(7).fill(0);
+    outages.forEach(function (t) { var d = new Date(t); byHour[d.getHours()]++; byWd[d.getDay()]++; });
+    var durs = [];
+    outages.forEach(function (t) {
+      for (var i = 0; i < ons.length; i++) if (ons[i] > t && ons[i] - t < 20 * 3600 * 1000) { durs.push(ons[i] - t); break; }
+    });
+    durs.sort(function (a, b) { return a - b; });
+    var median = durs.length ? durs[Math.floor(durs.length / 2)] : null;
+    var last = null;
+    events.forEach(function (e) { if (!last || e.ts > last.ts) last = e; });
+    var confirmers = 0;
+    if (last) confirmers = events.filter(function (e) { return e.type === last.type && Math.abs(e.ts - last.ts) < 90 * 60 * 1000; }).length;
+    return { outages: outages, byHour: byHour, byWd: byWd, median: median, last: last, confirmers: confirmers, count: outages.length };
+  }
+  function topWd(byWd) {
+    var m = Math.max.apply(null, byWd);
+    if (m === 0) return "—";
+    return byWd.map(function (c, i) { return { c: c, i: i }; }).filter(function (x) { return x.c >= m * 0.7; }).map(function (x) { return WD[x.i]; }).join("/");
+  }
+  function predict(a) {
+    var maxH = Math.max.apply(null, a.byHour), now = new Date();
+    var res = { big: "", note: "", conf: 0, confLabel: "", hotHours: [] };
+    var ranked = a.byHour.map(function (c, h) { return { h: h, c: c }; }).filter(function (x) { return x.c > 0; }).sort(function (x, y) { return y.c - x.c; });
+    res.hotHours = ranked.slice(0, 3).map(function (x) { return x.h; });
+    function conf(samples) {
+      var c = maxH / Math.max(1, samples);
+      var s = (samples >= 20 ? 2 : samples >= 8 ? 1 : 0) + (c > 0.34 ? 1 : 0);
+      s = Math.max(0, Math.min(3, s));
+      return { conf: s, confLabel: ["baja", "baja", "media", "alta"][s] };
+    }
+    if (a.count < 4) {
+      res.big = "Sigue reportando para activar la predicción.";
+      res.note = "Registrados " + a.count + " de 4 cortes mínimos en esta urbanización.";
+      return res;
+    }
+    var offNow = a.last && a.last.type === "off";
+    if (offNow && !a.median) {
+      res.big = "Corte en curso. <span class=\"hl\">Aún no hay datos</span> de cuánto suele durar aquí.";
+      res.note = "Cuando alguien reporte que volvió la luz se calculará la duración típica.";
+      Object.assign(res, conf(a.count)); return res;
+    }
+    if (offNow && a.median) {
+      var eta = new Date(a.last.ts + a.median);
+      if (eta.getTime() < Date.now()) {
+        res.big = "La luz ya <span class=\"hl\">superó la duración típica</span> (" + fmtDur(a.median) + "). Podría volver pronto.";
+      } else {
+        var sameDay = eta.toDateString() === now.toDateString();
+        res.big = "Luz estimada de vuelta: <span class=\"hl\">" + (sameDay ? "hoy " : WD[eta.getDay()] + " ") + hhmm(eta) + "</span>";
+        res.note = "Duración típica de corte aquí: " + fmtDur(a.median) + ".";
+      }
+      Object.assign(res, conf(a.count)); return res;
+    }
+    var thr = Math.max(2, maxH * 0.5), found = null;
+    for (var d = 1; d <= 47; d++) {
+      var t = new Date(now.getTime()); t.setMinutes(0, 0, 0); t.setHours(now.getHours() + d);
+      if (a.byHour[t.getHours()] >= thr) { found = t; break; }
+    }
+    if (found) {
+      var day = found.toDateString() === now.toDateString() ? "hoy"
+        : found.toDateString() === new Date(now.getTime() + 864e5).toDateString() ? "mañana" : WD[found.getDay()];
+      var h = found.getHours();
+      res.big = "Próximo corte probable: <span class=\"hl\">" + day + " entre " + h + ":00 y " + (h + 1) + ":00</span>";
+    } else {
+      res.big = "No hay una franja horaria dominante todavía.";
+    }
+    if (res.hotHours.length) res.note = "Franjas más afectadas: " + res.hotHours.map(function (h) { return h + ":00"; }).join(", ") + " · días: " + topWd(a.byWd);
+    Object.assign(res, conf(a.count));
+    return res;
+  }
+
+  function zoneName(id) { var z = state.zones.find(function (x) { return x.id === id; }); return z ? z.name : id; }
+
+  /* ---------- render ---------- */
+  function render() {
+    renderZoneSelect();
+    var a = analyze(state.events);
+    renderHero(a);
+    renderPredict(a);
+    renderChart(a);
+    renderFeed();
+    var ready = !!(state.db && state.selZone);
+    $("btnOff").disabled = $("btnOn").disabled = !ready;
+    $("reportHint").textContent = ready ? "La hora viene puesta en la actual. Ajústala si el corte fue antes."
+      : (!state.db ? "Sin conexión con la base de datos." : "Selecciona tu urbanización para habilitar el reporte.");
+  }
+
+  function renderZoneSelect() {
+    var sel = $("zone");
+    var want = state.selZone || "";
+    var opts = '<option value="">' + (state.zones.length ? "Selecciona…" : "Cargando…") + "</option>";
+    state.zones.forEach(function (z) {
+      var mark = z.lastType === "off" ? "  ●" : "";
+      opts += '<option value="' + escapeHtml(z.id) + '">' + escapeHtml(z.name) + mark + "</option>";
+    });
+    sel.innerHTML = opts;
+    sel.value = want;
+    if (sel.value !== want) sel.value = "";
+  }
+
+  function renderHero(a) {
+    var hero = $("hero"), crumb = $("heroCrumb");
+    var st = $("heroState"), since = $("heroSince"), meta = $("heroMeta");
+    hero.classList.remove("state-on", "state-off");
+    crumb.textContent = state.selZone ? "San Diego · " + zoneName(state.selZone) : "";
+    if (!state.selZone) {
+      st.textContent = "—"; since.textContent = "";
+      meta.textContent = "Elige tu urbanización arriba.";
+      return;
+    }
+    if (!a.last) {
+      st.textContent = "Sin datos"; since.textContent = "";
+      meta.textContent = "Nadie ha reportado aquí. Sé el primero.";
+      return;
+    }
+    if (a.last.type === "off") {
+      hero.classList.add("state-off");
+      st.textContent = "SIN LUZ";
+      since.textContent = fmtDur(Date.now() - a.last.ts);
+      meta.textContent = "desde " + hhmm(new Date(a.last.ts)) + " · " + a.confirmers + (a.confirmers === 1 ? " vecino lo confirma" : " vecinos lo confirman");
+    } else {
+      hero.classList.add("state-on");
+      st.textContent = "CON LUZ";
+      since.textContent = relTime(a.last.ts);
+      meta.textContent = "volvió a las " + hhmm(new Date(a.last.ts)) + " · " + a.confirmers + (a.confirmers === 1 ? " confirmación" : " confirmaciones");
+    }
+  }
+
+  function renderPredict(a) {
+    if (!state.selZone) {
+      $("predBig").textContent = "Selecciona tu urbanización.";
+      $("predNote").textContent = ""; $("predConf").hidden = true; state.hot = []; return;
+    }
+    var p = predict(a);
+    $("predBig").innerHTML = p.big;
+    $("predNote").textContent = p.note || "";
+    if (a.count >= 4) {
+      $("predConf").hidden = false;
+      $("confLabel").textContent = p.confLabel;
+      $("predConf").querySelectorAll(".bars i").forEach(function (b, i) { b.classList.toggle("f", i < p.conf); });
+    } else {
+      $("predConf").hidden = true;
+    }
+    state.hot = p.hotHours || [];
+  }
+
+  function renderChart(a) {
+    var c = $("chart"); c.innerHTML = "";
+    var max = Math.max.apply(null, a.byHour) || 1;
+    var hot = state.hot || [], nowH = new Date().getHours();
+    for (var h = 0; h < 24; h++) {
+      var bar = document.createElement("div");
+      bar.className = "bar" + (hot.indexOf(h) > -1 && a.byHour[h] > 0 ? " hot" : "") + (h === nowH ? " now" : "");
+      bar.style.height = Math.max(2, (a.byHour[h] / max) * 100) + "%";
+      bar.title = h + ":00 — " + a.byHour[h] + " corte" + (a.byHour[h] === 1 ? "" : "s");
+      c.appendChild(bar);
+    }
+    $("chartNote").textContent = !state.selZone ? "Elige una urbanización."
+      : a.count < 4 ? "El histograma se llena a medida que llegan reportes."
+      : "Cada barra = cortes que empezaron en esa hora. El recuadro marca la hora actual.";
+  }
+
+  function renderFeed() {
+    var f = $("feed");
+    if (!state.selZone) { f.innerHTML = '<li class="empty">Elige una urbanización.</li>'; return; }
+    if (!state.events.length) { f.innerHTML = '<li class="empty">Sin reportes en esta urbanización todavía.</li>'; return; }
+    var sorted = state.events.slice().sort(function (x, y) { return y.ts - x.ts; }).slice(0, 12);
+    f.innerHTML = "";
+    sorted.forEach(function (e) {
+      var li = document.createElement("li");
+      li.innerHTML = '<span class="tag ' + (e.type === "off" ? "off" : "on") + '"></span>' +
+        (e.type === "off" ? "Se fue la luz" : "Volvió la luz") +
+        '<span class="when">' + relTime(e.ts) + "</span>";
+      f.appendChild(li);
+    });
+  }
+
+  /* ---------- datos (Supabase) ---------- */
+  var _lzT, _lrT;
+  function loadZonesSoon() { clearTimeout(_lzT); _lzT = setTimeout(loadZones, 300); }
+  function refreshReports() { clearTimeout(_lrT); _lrT = setTimeout(loadReports, 250); }
+
+  async function loadZones() {
+    if (!SB) return;
+    var res = await SB.from("zonas").select("id,nombre,last_tipo,last_ts").order("nombre");
+    if (res.error) { console.warn(res.error); toast("No se pudieron cargar las urbanizaciones"); return; }
+    state.zones = (res.data || []).map(function (z) {
+      return { id: z.id, name: z.nombre, lastType: z.last_tipo || null, lastTs: z.last_ts ? Date.parse(z.last_ts) : 0 };
+    }).sort(function (a, b) { return a.name.localeCompare(b.name, "es"); });
+    if (!state.selZone) {
+      var saved = null; try { saved = localStorage.getItem("sd_zone"); } catch (e) {}
+      if (saved && state.zones.some(function (z) { return z.id === saved; })) selectZone(saved);
+    }
+    render();
+  }
+
+  async function loadReports() {
+    var z = state.selZone;
+    if (!SB || !z) { state.events = []; render(); return; }
+    var res = await SB.from("reportes").select("tipo,ocurrio_en").eq("zona_id", z)
+      .order("ocurrio_en", { ascending: false }).limit(600);
+    if (state.selZone !== z) return;
+    if (res.error) { console.warn(res.error); return; }
+    state.events = (res.data || []).map(function (r) {
+      return { type: r.tipo, ts: Date.parse(r.ocurrio_en) };
+    }).filter(function (e) { return e.ts; });
+    render();
+  }
+
+  function subscribeReports() {
+    if (state.repCh) { SB.removeChannel(state.repCh); state.repCh = null; }
+    if (!SB || !state.selZone) return;
+    state.repCh = SB.channel("rep-" + state.selZone)
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "reportes", filter: "zona_id=eq." + state.selZone },
+        refreshReports)
+      .subscribe();
+  }
+
+  function selectZone(id) {
+    if (state.selZone === id) return;
+    state.selZone = id || null;
+    state.events = [];
+    try { if (id) localStorage.setItem("sd_zone", id); } catch (e) {}
+    subscribeReports();
+    loadReports();
+    render();
+  }
+
+  function eventTs() {
+    var v = $("attime").value;
+    var d = new Date();
+    if (v && /^\d{1,2}:\d{2}/.test(v)) {
+      var p = v.split(":");
+      d.setHours(parseInt(p[0], 10), parseInt(p[1], 10), 0, 0);
+    } else {
+      d.setSeconds(0, 0);
+    }
+    var backDays = parseInt($("atday").value, 10) || 0;
+    if (backDays) d.setDate(d.getDate() - backDays);
+    else if (d.getTime() - Date.now() > 5 * 60000) d.setDate(d.getDate() - 1);
+    if (d.getTime() > Date.now()) d.setTime(Date.now());
+    return d.getTime();
+  }
+  function resetWhen() {
+    var n = new Date();
+    $("attime").value = String(n.getHours()).padStart(2, "0") + ":" + String(n.getMinutes()).padStart(2, "0");
+    $("atday").value = "0";
+  }
+
+  async function report(type) {
+    if (!SB || !state.selZone) return;
+    $("btnOff").disabled = $("btnOn").disabled = true;
+    var iso = new Date(eventTs()).toISOString();
+    var res = await SB.from("reportes").insert({ zona_id: state.selZone, tipo: type, ocurrio_en: iso, reporter: myId });
+    if (res.error) {
+      console.warn(res.error);
+      var m = res.error.message || "";
+      toast(/momento|duplicad/i.test(m) ? "Ya registraste ese reporte hace poco" : "No se pudo guardar, reintenta");
+    } else {
+      resetWhen();
+      toast(type === "off" ? "Reportado: se fue la luz" : "Reportado: volvió la luz");
+      refreshReports();
+    }
+    render();
+  }
+
+  async function addZone(name) {
+    name = (name || "").trim();
+    if (!name || !SB) return;
+    var dup = state.zones.find(function (z) { return z.name.toLowerCase() === name.toLowerCase(); });
+    if (dup) { selectZone(dup.id); toast("Esa urbanización ya existe"); return; }
+    var res = await SB.from("zonas")
+      .insert({ nombre: name, slug: slug(name) + "-" + Math.random().toString(36).slice(2, 6), custom: true })
+      .select("id,nombre").single();
+    if (res.error) { console.warn(res.error); toast("No se pudo agregar"); return; }
+    state.zones.push({ id: res.data.id, name: res.data.nombre, lastType: null, lastTs: 0 });
+    state.zones.sort(function (a, b) { return a.name.localeCompare(b.name, "es"); });
+    selectZone(res.data.id);
+    toast("Urbanización agregada");
+  }
+
+  /* ---------- diálogo agregar ---------- */
+  function openAdd() {
+    if (!SB) { toast("Primero conecta Supabase"); return; }
+    var dlg = $("addDlg"); $("addInput").value = "";
+    if (dlg.showModal) dlg.showModal();
+    else { var v = prompt("Nombre de la urbanización"); if (v) addZone(v); return; }
+    setTimeout(function () { $("addInput").focus(); }, 50);
+  }
+  function submitAdd() { addZone($("addInput").value); $("addDlg").close(); }
+  $("addBtn").onclick = openAdd;
+  $("addCancel").onclick = function () { $("addDlg").close(); };
+  $("addOk").onclick = submitAdd;
+  $("addInput").addEventListener("keydown", function (e) { if (e.key === "Enter") submitAdd(); });
+
+  /* ---------- wiring ---------- */
+  $("zone").addEventListener("change", function () { selectZone(this.value); });
+  $("btnOff").onclick = function () { report("off"); };
+  $("btnOn").onclick = function () { report("on"); };
+  resetWhen();
+  setInterval(function () { if (state.selZone) render(); }, 60000);
+
+  /* ---------- boot ---------- */
+  render();
+  (function () {
+    var unset = !SUPABASE_URL || SUPABASE_URL.indexOf("TU-PROYECTO") > -1 ||
+                !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf("TU_ANON") > -1;
+    if (unset || !window.supabase) {
+      var b = $("dbBanner"); b.hidden = false;
+      b.innerHTML = unset
+        ? "<b>Falta conectar Supabase.</b> Edita <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> al inicio del <code>&lt;script&gt;</code> de este archivo. Pasos en <code>README.md</code>."
+        : "<b>No cargó la librería de Supabase.</b> Revisa tu conexión y recarga.";
+      return;
+    }
+    SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    state.db = SB;
+    loadZones();
+    SB.channel("zonas-all")
+      .on("postgres_changes", { event: "*", schema: "public", table: "zonas" }, loadZonesSoon)
+      .subscribe();
+  })();
+})();
+</script>
+</body>
+</html>
