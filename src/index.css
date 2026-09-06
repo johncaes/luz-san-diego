@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* Mapea los tokens de Tailwind a variables CSS que cambian con el tema.
+   "inline" hace que las utilidades (bg-surface, text-ink-mid…) usen el
+   var() directamente, así los overrides de :root en tiempo de ejecución
+   funcionan sin recompilar. */
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-line: var(--c-line);
+  --color-line-soft: var(--c-line-soft);
+  --color-ink: var(--c-ink);
+  --color-ink-mid: var(--c-ink-mid);
+  --color-ink-dim: var(--c-ink-dim);
+  --color-amber: var(--c-amber);
+  --color-amber-soft: var(--c-amber-soft);
+  --color-on: var(--c-on);
+  --color-on-soft: var(--c-on-soft);
+  --color-off: var(--c-off);
+  --color-off-soft: var(--c-off-soft);
+
+  --font-display: "Bricolage Grotesque", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-card: var(--sh-card);
+}
+
+:root {
+  color-scheme: dark;
+  --c-bg: #14120e;
+  --c-surface: #1e1b15;
+  --c-surface-2: #262117;
+  --c-line: #38311f;
+  --c-line-soft: #2b2519;
+  --c-ink: #efe7d6;
+  --c-ink-mid: #b3a689;
+  --c-ink-dim: #8a7d63;
+  --c-amber: #f5b841;
+  --c-amber-soft: #6b4f1c;
+  --c-on: #64c08a;
+  --c-on-soft: #1f3a2b;
+  --c-off: #e2634c;
+  --c-off-soft: #43221c;
+  --page-grad: radial-gradient(120% 90% at 50% -10%, #221d14 0%, #14120e 55%, #100e0b 100%);
+  --sh-card: 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --c-bg: #f4efe4;
+    --c-surface: #fffdf7;
+    --c-surface-2: #f7f1e3;
+    --c-line: #e0d6bf;
+    --c-line-soft: #eee6d3;
+    --c-ink: #2c2618;
+    --c-ink-mid: #6b6047;
+    --c-ink-dim: #8a7d63;
+    --c-amber: #c8871a;
+    --c-amber-soft: #f0deb4;
+    --c-on: #2f8f5b;
+    --c-on-soft: #d8ecdf;
+    --c-off: #c34a34;
+    --c-off-soft: #f2ddd6;
+    --page-grad: radial-gradient(120% 90% at 50% -10%, #fbf7ec 0%, #f4efe4 60%, #ece5d5 100%);
+    --sh-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 16px 34px -22px rgba(80, 60, 20, 0.35);
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--c-bg);
+  background-image: var(--page-grad);
+  background-attachment: fixed;
+  color: var(--c-ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* El picker nativo de fecha/hora en su color correcto por tema */
+input[type="time"],
+input[type="date"] {
+  color-scheme: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

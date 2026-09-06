@@ -1,96 +1,82 @@
 # ¿Cuándo se va la luz? — San Diego, Carabobo
 
-App web pública de reportes vecinales de cortes eléctricos, con predicción
-de la próxima falla por urbanización. Frontend estático (un solo
-`index.html`) + Supabase como base de datos.
+App web de reportes vecinales de cortes eléctricos, con predicción de la
+próxima falla por urbanización.
+
+- **Frontend:** Vite + React 19 + Tailwind CSS v4 (mobile-first)
+- **Backend:** Supabase (Postgres + RLS + Realtime)
 
 ```
-index.html            → la app (editar la config de Supabase adentro)
-supabase/schema.sql   → tablas, seguridad (RLS), realtime y catálogo inicial
-artifact-src/          → versión anterior hecha con la BD integrada de Claude (referencia)
+index.html              → entrada de Vite
+src/
+  App.jsx               → composición de la pantalla
+  lib/
+    supabase.js          → cliente + config (URL y publishable key)
+    predict.js           → análisis y predicción (funciones puras)
+    format.js            → helpers de fecha/duración/slug
+  hooks/
+    useZones.js          → catálogo de urbanizaciones + realtime
+    useReports.js        → eventos de una zona + realtime + insertar
+  components/            → Header, ZonePicker, StatusHero, ReportCard,
+                           PredictionCard, HourChart, ActivityFeed, …
+supabase/schema.sql     → tablas, RLS, triggers, realtime, catálogo de 68 urbanizaciones
+legacy-static/          → versión anterior en un solo HTML sin build (referencia)
+artifact-src/           → primera versión, hecha con la BD integrada de Claude
 ```
 
----
-
-## 1. Crear el proyecto en Supabase
-
-1. Entra a <https://supabase.com> → **New project**.
-2. Elige región **East US (North Virginia)** (la más cercana a Venezuela con
-   buena latencia) y una contraseña de base de datos.
-3. Espera ~2 min a que termine de aprovisionar.
-
-## 2. Cargar el esquema
-
-1. En el panel del proyecto: **SQL Editor** → **New query**.
-2. Pega **todo** el contenido de [`supabase/schema.sql`](supabase/schema.sql).
-3. **Run**. Debe terminar sin errores y crear las tablas `zonas` y
-   `reportes`, las políticas de seguridad y las 68 urbanizaciones.
-
-Puedes volver a correr ese archivo cuando quieras: es idempotente.
-
-## 3. Conectar la app
-
-1. En Supabase: **Project Settings › API**.
-2. Copia **Project URL** y la **Publishable key** (`sb_publishable_...`).
-3. Abre `index.html` y reemplaza al inicio del `<script>`:
-
-   ```js
-   var SUPABASE_URL = "https://xxxxxxxx.supabase.co";
-   var SUPABASE_ANON_KEY = "sb_publishable_...";
-   ```
-
-La publishable key es **pública a propósito** — va en el navegador de
-todos. Lo que protege los datos son las políticas RLS del `schema.sql`:
-cualquiera puede leer y crear reportes, nadie puede editar ni borrar.
-Nunca pongas aquí la *secret key* (`sb_secret_...`).
-
-## 4. Probar en local
-
-Abrir `index.html` directo en el navegador funciona. Si tu navegador
-bloquea algo por CORS, sirve la carpeta:
+## Desarrollo
 
 ```bash
-python3 -m http.server 8080
-# luego abre http://localhost:8080
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # genera dist/
+npm run preview    # sirve dist/ para revisar el build
 ```
 
-Elige una urbanización, reporta "Se fue la luz" y verifica que aparece en
-**Actividad reciente** y en el **Table Editor** de Supabase.
+## Configurar Supabase
 
-## 5. Publicar
+1. Crea un proyecto en <https://supabase.com> (región **East US**).
+2. **SQL Editor** → pega [`supabase/schema.sql`](supabase/schema.sql) → **Run**
+   (es idempotente, se puede correr varias veces).
+3. **Project Settings › API** → copia **Project URL** y la **Publishable key**
+   (`sb_publishable_...`).
+4. Ponlas como variables de entorno (recomendado) o edítalas en
+   `src/lib/supabase.js`:
 
-Es un sitio estático, cualquiera de estas sirve (todas con plan gratis):
+   ```
+   VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=sb_publishable_...
+   ```
 
-| Servicio | Cómo |
-|---|---|
-| **Netlify** | app.netlify.com → **Add new site › Deploy manually** → arrastra la carpeta |
-| **Cloudflare Pages** | Conecta el repo o sube la carpeta; sin configuración de build |
-| **Vercel** | `vercel` en la carpeta, o importa el repo (framework: *Other*) |
-| **GitHub Pages** | Sube el repo, Settings › Pages › rama `main` |
+   Un archivo `.env` en la raíz sirve para local (está en `.gitignore`).
+   La publishable key es **pública a propósito**; lo que protege los datos
+   son las políticas RLS. Nunca uses aquí la *secret key* (`sb_secret_...`).
 
-No hay paso de build. El único archivo que importa es `index.html`.
+## Publicar
 
----
+### GitHub Pages (automático)
+Ya hay un workflow en `.github/workflows/deploy.yml`. Solo actívalo:
+
+**Settings › Pages › Build and deployment › Source: GitHub Actions.**
+
+Cada `git push` a `main` compila y publica. Queda en
+`https://<usuario>.github.io/luz-san-diego/`.
+Si usas env vars, agrégalas en **Settings › Secrets and variables › Actions**
+y referéncialas en el workflow; si dejaste los valores en `supabase.js`, no
+hace falta nada más.
+
+### Vercel / Netlify
+Importa el repo. Framework: **Vite**. Build: `npm run build`. Output: `dist`.
+Agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en las env vars del
+proyecto. Cada push redeploya.
 
 ## Notas
 
-**Volumen / costo.** Un municipio genera del orden de miles de reportes al
-mes. El plan gratuito de Supabase (500 MB de BD, 2 GB de egreso, realtime
-incluido) sobra por años.
+**Predicción.** Se calcula en el navegador con los últimos ~600 eventos de la
+zona: histograma por hora, día de la semana más afectado y duración mediana
+del corte. Necesita ≥ 4 cortes registrados para activarse.
 
-**Abuso.** Hoy la protección es mínima: un `reporter` aleatorio guardado en
-el navegador + un trigger que rechaza el mismo reporte repetido en < 2 min.
-Alguien decidido puede meter reportes falsos. Si el proyecto crece, lo
-siguiente sería:
-- Turnstile / hCaptcha antes de reportar (invisible, gratis).
-- Una Edge Function que valide y limite por IP.
-- Peso por consenso: exigir 2–3 reportes independientes para cambiar el
-  estado de una zona.
-
-**Agregar urbanizaciones.** Los vecinos pueden desde la app ("Agregar
-urbanización"). Para cargar varias de golpe, un `INSERT` en el SQL Editor
-igual que en `schema.sql`.
-
-**Predicción.** Se calcula en el navegador con los últimos ~600 eventos de
-la zona: histograma por hora, día de la semana más afectado y duración
-mediana del corte. Necesita al menos 4 cortes registrados para activarse.
+**Abuso.** Protección mínima hoy: un `reporter` aleatorio por dispositivo +
+un trigger que rechaza el mismo reporte repetido en < 2 min. Si el proyecto
+crece: Turnstile/hCaptcha antes de reportar, o una Edge Function que limite
+por IP, o exigir varios reportes independientes para cambiar el estado.
