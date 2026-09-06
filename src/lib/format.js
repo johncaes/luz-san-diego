@@ -1,5 +1,13 @@
 export const WD = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
+/** minúsculas + sin acentos, para búsquedas tolerantes. */
+export function norm(s) {
+  return String(s)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
 export function slug(s) {
   return (
     String(s)
